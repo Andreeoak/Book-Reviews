@@ -21,6 +21,7 @@ class Book extends Model
         return $query->where('title', 'LIKE', '%' . $title . '%');
     }
 
+
     public function scopeWithReviewsCount(Builder $query, $from = null, $to = null): Builder|QueryBuilder
     {
         return $query->withCount([
@@ -49,7 +50,7 @@ class Book extends Model
 
     public function scopeMinReviews(Builder $query, int $minReviews): Builder|QueryBuilder
     {
-        return $query->where('reviews_count', '>=', $minReviews);
+        return $query->having('reviews_count', '>=', $minReviews);
     }
 
     private function dateRangeFilter(Builder $query, $from = null, $to = null)
