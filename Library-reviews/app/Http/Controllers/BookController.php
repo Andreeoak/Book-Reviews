@@ -13,7 +13,23 @@ class BookController extends Controller
     public function index(Request $request)
     {
         $title = $request->input('title');
-        $books = Book::when($title, fn($query, $title) => $query->title($title))->get();
+        $filter = $request->input('filter', '');
+
+        $query = Book::query();
+
+        if ($title) {
+            $query->title($title);
+        }
+
+        $query = match ($filter) {
+            'popular_last_month' => $query->popularLastMonth(),
+            'popular_last_6months' => $query->popularLast6Months(),
+            'highest_rated_last_month' => $query->highestRatedLastMonth(),
+            'highest_rated_last_6months' => $query->highestRatedLast6Months(),
+            default => $query->latest()
+        };
+
+        $books = $query->get();
 
         return view('books.index', ['books' => $books]);
     }
