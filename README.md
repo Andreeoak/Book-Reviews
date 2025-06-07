@@ -1,6 +1,8 @@
 # 📚 Laravel Book Dashboard
 
 A dynamic Laravel-powered dashboard for browsing and analyzing book data with user-submitted reviews. This project demonstrates advanced Eloquent usage, query scopes, and a responsive UI for filtering content from a relational MySQL database.
+UPDATE: Now implements Laravel's file cache driver to store frequently accessed data, reducing database load and improving response times.
+UPDATE2: Now employs Laravel's rate limiting middleware to control the number of requests a user can make in a given time frame, preventing abuse and ensuring fair usage.
 
 ## ✨ Features
 
