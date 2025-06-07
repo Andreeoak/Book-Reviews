@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Book;
 
+
 class BookController extends Controller
 {
     /**
@@ -15,21 +16,24 @@ class BookController extends Controller
         $title = $request->input('title');
         $filter = $request->input('filter', '');
 
-        $query = Book::query();
+        $books = Book::query();
 
         if ($title) {
-            $query->title($title);
+            $books->title($title);
         }
 
-        $query = match ($filter) {
-            'popular_last_month' => $query->popularLastMonth(),
-            'popular_last_6months' => $query->popularLast6Months(),
-            'highest_rated_last_month' => $query->highestRatedLastMonth(),
-            'highest_rated_last_6months' => $query->highestRatedLast6Months(),
-            default => $query->latest()
+        $books = match ($filter) {
+            'popular_last_month' => $books->popularLastMonth(),
+            'popular_last_6months' => $books->popularLast6Months(),
+            'highest_rated_last_month' => $books->highestRatedLastMonth(),
+            'highest_rated_last_6months' => $books->highestRatedLast6Months(),
+            default => $books->latest()
         };
 
-        $books = $query->get();
+
+
+        $cacheKey = 'books:' . $filter . ':' . $title;
+        $books = cache()->remember($cacheKey, 3600, fn() => $books->get());
 
         return view('books.index', ['books' => $books]);
     }
@@ -55,14 +59,13 @@ class BookController extends Controller
      */
     public function show(Book $book)
     {
-         return view(
-            'books.show',
-            [
-                'book' => $book->load([
-                    'reviews' => fn($query) => $query->latest()
-                ])
-            ]
-        );
+        $cacheKey = 'book:' . $book->id;
+
+        $book = cache()->remember($cacheKey, 3600, fn() => $book->load([
+            'reviews' => fn($query) => $query->latest()
+        ]));
+
+        return view('books.show', ['book' => $book]);
     }
 
     /**
